@@ -3,47 +3,111 @@ from typing import Tuple
 
 import pygame
 import pygame.freetype  # Import the freetype module.
-from pygame import Surface, SurfaceType
 
-pygame.init()
+from ui import render_card, render_stack
 
-# GAME_FONT = pygame.freetype.Font("your_font.ttf", 24)
-GAME_FONT = pygame.freetype.SysFont('DejaVu Sans', 30)
+
+
+cards = [
+    '♠1',
+    '♠2',
+    '♠3',
+    '♠4',
+    '♠5',
+    '♠6',
+    '♠7',
+    '♠8',
+    '♠9',
+    '♠10',
+    '♠J',
+    '♠Q',
+    '♠K',
+
+    '♥1',
+    '♥2',
+    '♥4',
+    '♥5',
+    '♥6',
+    '♥7',
+    '♥8',
+    '♥9',
+    '♥10',
+    '♥J',
+    '♥Q',
+    '♥K',
+
+    '♦1',
+    '♦2',
+    '♦3',
+    '♦4',
+    '♦5',
+    '♦6',
+    '♦7',
+    '♦8',
+    '♦9',
+    '♦10',
+    '♦J',
+    '♦Q',
+    '♦K',
+
+    '♣1',
+    '♣2',
+    '♣3',
+    '♣4',
+    '♣5',
+    '♣6',
+    '♣7',
+    '♣8',
+    '♣9',
+    '♣10',
+    '♣J',
+    '♣Q',
+    '♣K',
+]
+
+COL_WIDTH = 190
 
 COL_TOP = 220
-COL_WIDTH = 190
-SPACE_WITHIN_COL = 30
 
 
-def render_stack(screen: Surface, stack: dict, pos: tuple[int, int]):
-    count = 0
-    for card in stack['face_down']:
-        render_card(screen, card, (pos[0], pos[1] + SPACE_WITHIN_COL * count), face_down=True)
-        count = count + 1
-    # render_card(screen, stack['face_down'][0], (pos[0], pos[1] + SPACE_WITHIN_COL * count), face_down=True)
-    # count = count + 1
-    # render_card(screen, stack['face_down'][1], (pos[0], pos[1] + SPACE_WITHIN_COL * count), face_down=True)
-    # count = count + 1
-    # render_card(screen, stack['face_down'][2], (pos[0], pos[1] + SPACE_WITHIN_COL * count), face_down=True)
-    # count = count + 1
-    for card in stack['face_up']:
-        render_card(screen, card, (pos[0], pos[1] + SPACE_WITHIN_COL * count))
-        count = count + 1
-    # render_card(screen, stack['face_up'][0], (pos[0], pos[1] + SPACE_WITHIN_COL * count))
-    # count = count + 1
-    # render_card(screen, stack['face_up'][1], (pos[0], pos[1] + SPACE_WITHIN_COL * count))
-    # count = count + 1
-    # render_card(screen, stack['face_up'][2], (pos[0], pos[1] + SPACE_WITHIN_COL * count))
 
+stacks = [
+    {
+        'face_down': [
+        ],
+        'face_up': [ 
+            cards.pop(),
+        ],
+    },
+    {
+        'face_down': [
+            cards.pop(),
+        ],
+        'face_up': [
+            cards.pop(),
+        ],
+    },
+    {
+        'face_down': [
+            cards.pop(),
+            cards.pop(),
+        ],
+        'face_up': [
+            cards.pop(),
+        ],
+    },   
+    {
+        'face_down': [
+            cards.pop(),
+            cards.pop(),
+            cards.pop(),
+        ],
+        'face_up': [
+            cards.pop(),
+        ],
+    },
 
-def render_card(screen: Surface, value: str, pos: tuple[int, int], face_down=False):
-    if face_down:
-        pygame.draw.rect(screen, "blue", (pos, (100, 200)))
-        pygame.draw.rect(screen, "black", (pos, (100, 200)), 3)
-    else:
-        pygame.draw.rect(screen, "white", (pos, (100, 200)))
-        pygame.draw.rect(screen, "black", (pos, (100, 200)), 3)
-        GAME_FONT.render_to(screen, (pos[0] + 5, pos[1] + 5), value, (0, 0, 0))
+]
 
 
 def main() -> None:
@@ -70,33 +134,13 @@ def main() -> None:
         render_card(screen, '♠1', (290 + COL_WIDTH * 2, 5))
         render_card(screen, '♠1', (290 + COL_WIDTH * 3, 5))
 
-        stack = {
-            'face_down': [
-                '♠1',
-                '♠2',
-                '♠3',
-            ],
-            'face_up': [
-                '♦8',
-                '♠7',
-                '♠34',
-                '♦8000',
-            ],
-        }
 
-        # render_card(screen, '♣10', (5, col_top))
-        render_stack(screen, stack, (5, COL_TOP))
-        render_stack(screen, stack, (5 + COL_WIDTH, COL_TOP))
 
-        #render_card(screen, '♠K', (5 + COL_WIDTH, COL_TOP), face_down=True)
-        #render_card(screen, '♠K', (5 + COL_WIDTH * 2, COL_TOP), face_down=True)
-        #render_card(screen, '♠K', (5 + COL_WIDTH * 3, COL_TOP), face_down=True)
-        #render_card(screen, '♠K', (5 + COL_WIDTH * 4, COL_TOP), face_down=True)
-        #render_card(screen, '♠K', (5 + COL_WIDTH * 5, COL_TOP), face_down=True)
-        #render_card (screen, '♠K', (5 + COL_WIDTH * 6, COL_TOP), face_down=True)
+        count = 0
+        for stack in stacks:
+            render_stack(screen, stack, (5 + COL_WIDTH * count, COL_TOP))
+            count = count + 1
 
-        #render_card(screen, '♠K', (5 + COL_WIDTH, COL_TOP + SPACE_WITHIN_COL))
-        #render_card(screen, '♠K', (5 + COL_WIDTH, COL_TOP + SPACE_WITHIN_COL * 2))
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w]:
