@@ -1,7 +1,5 @@
 from random import shuffle
 
-# from rich import print
-
 # https://en.wikipedia.org/wiki/Playing_cards_in_Unicode
 # https://en.wikipedia.org/wiki/Playing_card_suit
 
