@@ -106,8 +106,48 @@ stacks = [
             cards.pop(),
         ],
     },
+    {
+        'face_down': [
+            cards.pop(),
+            cards.pop(),
+        ],
+        'face_up': [
+        ],
+    },
+    {
+        'face_down': [
+            cards.pop(),
+        ],
+        'face_up': [
+            cards.pop(),
+            cards.pop(),
+        ],
+    },
 
 ]
+
+
+def is_face_down(card: str) -> bool:
+    for stack in stacks:
+        for each_card in stack['face_down']:
+            if each_card == card:
+                return True
+    return False
+
+
+def is_face_up(card: str) -> bool:
+    for stack in stacks:
+        for each_card in stack['face_up']:
+            if each_card == card:
+                return True
+    return False
+
+
+def find_stack(card: str) -> dict | None:
+    for stack in stacks:
+        if card in stack['face_down'] or card in stack['face_up']:
+            return stack
+    return None
 
 
 def main() -> None:
@@ -121,6 +161,7 @@ def main() -> None:
 
     rects: list[tuple[str, Rect]] = []
 
+    card_focused: str | None = None
     card_clicked: str | None = None
 
     while running:
@@ -135,17 +176,26 @@ def main() -> None:
                     if rect[1].collidepoint(click_pos):
                         card_clicked = rect[0]
 
+        if is_face_down(card_clicked):
+            stack = find_stack(card_clicked)
+            if len(stack['face_up']) == 0:
+                stack['face_down'].pop()
+                stack['face_up'].append(card_clicked)
+
+        if is_face_up(card_clicked):
+            card_focused = card_clicked
+
         # fill the screen with a color to wipe away anything from last frame
         screen.fill("darkgreen")
 
-        rects.append(render_card(screen, '♠1', (290, 5)))
-        rects.append(render_card(screen, '♠1', (290 + COL_WIDTH, 5)))
-        rects.append(render_card(screen, '♠1', (290 + COL_WIDTH * 2, 5)))
-        rects.append(render_card(screen, '♠1', (290 + COL_WIDTH * 3, 5)))
+        rects.append(render_card(screen, '♠25', (290, 5), face_down=True))
+        rects.append(render_card(screen, '♠25', (290 + COL_WIDTH, 5), face_down=True))
+        rects.append(render_card(screen, '♠25', (290 + COL_WIDTH * 2, 5), face_down=True))
+        rects.append(render_card(screen, '♠25', (290 + COL_WIDTH * 3, 5), face_down=True))
 
         count = 0
         for stack in stacks:
-            rects = rects + render_stack(screen, stack, (5 + COL_WIDTH * count, COL_TOP), card_clicked)
+            rects = rects + render_stack(screen, stack, (5 + COL_WIDTH * count, COL_TOP), card_focused)
             count = count + 1
 
         keys = pygame.key.get_pressed()
@@ -165,7 +215,6 @@ def main() -> None:
         # dt is delta time in seconds since last frame, used for framerate-
         # independent physics.
         dt = clock.tick(60) / 1000
-
 
     pygame.quit()
 
