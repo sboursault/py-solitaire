@@ -8,6 +8,7 @@ import pygame
 import pygame.freetype  # Import the freetype module.
 from pygame import Rect
 
+import ui
 from ui import render_card, render_stack
 
 cards = [
@@ -162,9 +163,11 @@ def main() -> None:
     rects: list[tuple[str, Rect]] = []
 
     card_focused: str | None = None
-    card_clicked: str | None = None
 
     while running:
+
+        card_clicked: str | None = None
+
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
         for event in pygame.event.get():
@@ -181,12 +184,14 @@ def main() -> None:
             if len(stack['face_up']) == 0:
                 stack['face_down'].pop()
                 stack['face_up'].append(card_clicked)
-
-        if is_face_up(card_clicked):
-            card_focused = card_clicked
+        elif is_face_up(card_clicked):
+            if card_focused == card_clicked:
+                card_focused = None
+            else:
+                card_focused = card_clicked
 
         # fill the screen with a color to wipe away anything from last frame
-        screen.fill("darkgreen")
+        ui.draw_bg(screen)
 
         rects.append(render_card(screen, '♠25', (290, 5), face_down=True))
         rects.append(render_card(screen, '♠25', (290 + COL_WIDTH, 5), face_down=True))

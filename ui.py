@@ -1,3 +1,5 @@
+import functools
+
 import pygame
 from pygame import Surface, Rect
 
@@ -7,6 +9,20 @@ SPACE_WITHIN_COL = 30
 
 # GAME_FONT = pygame.freetype.Font("your_font.ttf", 24)
 GAME_FONT = pygame.freetype.SysFont('DejaVu Sans', 30)
+
+
+@functools.cache
+def get_bg_img():
+    image = pygame.image.load('/home/seb/Images/Pokemon/assets/images/0249.png').convert_alpha()
+    return pygame.transform.smoothscale(image, (700, 700))
+
+
+def draw_bg(screen: Surface):
+    screen.fill("darkgreen")
+    image = get_bg_img()
+    left = (screen.get_width() - image.get_width()) / 2
+    top = (screen.get_height() - image.get_height()) / 2
+    screen.blit(image, (left, top))
 
 
 def render_stack(screen: Surface, stack: dict, pos: tuple[int, int],
