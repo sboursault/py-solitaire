@@ -4,146 +4,20 @@
 
 # https://stackoverflow.com/questions/12150957/pygame-action-when-mouse-click-on-rect
 
+
 import pygame
 import pygame.freetype  # Import the freetype module.
 from pygame import Rect
 
 import sol
 import ui
-from ui import render_card, render_stack
-
-cards = [
-    '♠1',
-    '♠2',
-    '♠3',
-    '♠4',
-    '♠5',
-    '♠6',
-    '♠7',
-    '♠8',
-    '♠9',
-    '♠10',
-    '♠J',
-    '♠Q',
-    '♠K',
-
-    '♥1',
-    '♥2',
-    '♥4',
-    '♥5',
-    '♥6',
-    '♥7',
-    '♥8',
-    '♥9',
-    '♥10',
-    '♥J',
-    '♥Q',
-    '♥K',
-
-    '♦1',
-    '♦2',
-    '♦3',
-    '♦4',
-    '♦5',
-    '♦6',
-    '♦7',
-    '♦8',
-    '♦9',
-    '♦10',
-    '♦J',
-    '♦Q',
-    '♦K',
-
-    '♣1',
-    '♣2',
-    '♣3',
-    '♣4',
-    '♣5',
-    '♣6',
-    '♣7',
-    '♣8',
-    '♣9',
-    '♣10',
-    '♣J',
-    '♣Q',
-    '♣K',
-]
+from ui import render_stack
 
 COL_WIDTH = 190
 
 COL_TOP = 220
 
-stacks = [
-    {
-        'face_down': [
-        ],
-        'face_up': [
-            cards.pop(),
-        ],
-    },
-    {
-        'face_down': [
-            cards.pop(),
-        ],
-        'face_up': [
-            cards.pop(),
-        ],
-    },
-    {
-        'face_down': [
-            cards.pop(),
-            cards.pop(),
-        ],
-        'face_up': [
-            cards.pop(),
-        ],
-    },
-    {
-        'face_down': [
-            cards.pop(),
-            cards.pop(),
-            cards.pop(),
-        ],
-        'face_up': [
-            cards.pop(),
-        ],
-    },
-    {
-        'face_down': [
-            cards.pop(),
-            cards.pop(),
-        ],
-        'face_up': [
-        ],
-    },
-    {
-        'face_down': [
-            cards.pop(),
-        ],
-        'face_up': [
-            cards.pop(),
-            cards.pop(),
-        ],
-    },
-
-]
-
-
-def is_face_down(card: str) -> bool:
-    for stack in stacks:
-        for each_card in stack['face_down']:
-            if each_card == card:
-                return True
-    return False
-
-
-def is_face_up(card: str) -> bool:
-    for stack in stacks:
-        for each_card in stack['face_up']:
-            if each_card == card:
-                return True
-    return False
-
+stacks = sol.deal_cards()
 
 
 def main() -> None:
@@ -174,9 +48,9 @@ def main() -> None:
                     if rect[1].collidepoint(click_pos):
                         card_clicked = rect[0]
 
-        if is_face_down(card_clicked):
+        if sol.is_face_down(stacks, card_clicked):
             sol.return_card(stacks, card_clicked)
-        elif is_face_up(card_clicked):
+        elif sol.is_face_up(stacks, card_clicked):
             if card_focused == card_clicked:
                 card_focused = None
             else:
@@ -185,10 +59,10 @@ def main() -> None:
         # fill the screen with a color to wipe away anything from last frame
         ui.draw_bg(screen)
 
-        rects.append(render_card(screen, '♠25', (290, 5), face_down=True))
-        rects.append(render_card(screen, '♠25', (290 + COL_WIDTH, 5), face_down=True))
-        rects.append(render_card(screen, '♠25', (290 + COL_WIDTH * 2, 5), face_down=True))
-        rects.append(render_card(screen, '♠25', (290 + COL_WIDTH * 3, 5), face_down=True))
+        # rects.append(render_card(screen, '♠25', (290, 5), face_down=True))
+        # rects.append(render_card(screen, '♠25', (290 + COL_WIDTH, 5), face_down=True))
+        # rects.append(render_card(screen, '♠25', (290 + COL_WIDTH * 2, 5), face_down=True))
+        # rects.append(render_card(screen, '♠25', (290 + COL_WIDTH * 3, 5), face_down=True))
 
         count = 0
         for stack in stacks:
