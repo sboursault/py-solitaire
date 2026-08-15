@@ -13,8 +13,8 @@ GAME_FONT = pygame.freetype.SysFont('DejaVu Sans', 30)
 
 @functools.cache
 def get_bg_img():
-    image = pygame.image.load('/home/seb/Images/Pokemon/assets/images/0249.png').convert_alpha()
-    return pygame.transform.smoothscale(image, (700, 700))
+    img = pygame.image.load('/home/seb/Images/Pokemon/assets/images/0249.png').convert_alpha()
+    return pygame.transform.smoothscale(img, (700, 700))
 
 
 def draw_bg(screen: Surface):

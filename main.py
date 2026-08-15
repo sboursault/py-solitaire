@@ -8,6 +8,7 @@ import pygame
 import pygame.freetype  # Import the freetype module.
 from pygame import Rect
 
+import sol
 import ui
 from ui import render_card, render_stack
 
@@ -144,12 +145,6 @@ def is_face_up(card: str) -> bool:
     return False
 
 
-def find_stack(card: str) -> dict | None:
-    for stack in stacks:
-        if card in stack['face_down'] or card in stack['face_up']:
-            return stack
-    return None
-
 
 def main() -> None:
     # pygame setup
@@ -180,10 +175,7 @@ def main() -> None:
                         card_clicked = rect[0]
 
         if is_face_down(card_clicked):
-            stack = find_stack(card_clicked)
-            if len(stack['face_up']) == 0:
-                stack['face_down'].pop()
-                stack['face_up'].append(card_clicked)
+            sol.return_card(stacks, card_clicked)
         elif is_face_up(card_clicked):
             if card_focused == card_clicked:
                 card_focused = None
