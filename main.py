@@ -9,7 +9,7 @@ import pygame
 import pygame.freetype  # Import the freetype module.
 from pygame import Rect
 
-import sol
+from sol import *
 import ui
 from ui import render_stack
 
@@ -17,7 +17,7 @@ COL_WIDTH = 190
 
 COL_TOP = 220
 
-stacks = sol.deal_cards()
+stacks = deal_cards()
 
 
 def main() -> None:
@@ -48,13 +48,16 @@ def main() -> None:
                     if rect[1].collidepoint(click_pos):
                         card_clicked = rect[0]
 
-        if sol.is_face_down(stacks, card_clicked):
-            sol.return_card(stacks, card_clicked)
-        elif sol.is_face_up(stacks, card_clicked):
-            if card_focused == card_clicked:
-                card_focused = None
-            else:
+        if is_face_down(stacks, card_clicked):
+            return_card(stacks, card_clicked)
+        elif is_face_up(stacks, card_clicked):
+            if not card_focused:
                 card_focused = card_clicked
+            else:
+                if card_focused == card_clicked:
+                    card_focused = None
+                # else:
+                # move cards
 
         # fill the screen with a color to wipe away anything from last frame
         ui.draw_bg(screen)
