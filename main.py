@@ -11,7 +11,7 @@ from pygame import Rect
 
 from sol import *
 import ui
-from ui import render_stack
+from ui import render_stack, Card, render_card
 
 COL_WIDTH = 190
 
@@ -29,7 +29,7 @@ def main() -> None:
 
     player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 
-    rects: list[tuple[str, Rect]] = []
+    cards: list[Card] = []
 
     card_focused: str | None = None
 
@@ -46,14 +46,14 @@ def main() -> None:
                 running = False
 
             # https://stackoverflow.com/questions/44343626/how-to-draw-objects-that-can-be-dragged-and-droped-on-the-screen-using-pygame
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                card_dragged = find_clicked_card(rects)
+            #if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            #    card_dragged = find_clicked_card(cards)
             #if event.type == pygame.MOUSEMOTION:
             #    if card_dragged:
             #        card_dragged.topleft = event.pos + offset
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 card_dragged = None
-                card_clicked = find_clicked_card(rects)
+                card_clicked = find_clicked_card(cards)
 
         if is_face_down(stacks, card_clicked):
             return_card(stacks, card_clicked)
@@ -64,8 +64,8 @@ def main() -> None:
             else:
                 if card_focused == card_clicked:
                     card_focused = None
-                # else:
-                # move cards
+               # else:
+               # move cards
 
         # fill the screen with a color to wipe away anything from last frame
         ui.draw_bg(screen)
@@ -75,12 +75,13 @@ def main() -> None:
         # rects.append(render_card(screen, '♠25', (290 + COL_WIDTH * 2, 5), face_down=True))
         # rects.append(render_card(screen, '♠25', (290 + COL_WIDTH * 3, 5), face_down=True))
 
-        ## REDRAW EVERYTHING... COULD BE AVOIDED WHEN DRAGGING CARD
-
         count = 0
         for stack in stacks:
-            rects = rects + render_stack(screen, stack, (5 + COL_WIDTH * count, COL_TOP), card_focused)
+            cards = cards + render_stack(stack, (5 + COL_WIDTH * count, COL_TOP))
             count = count + 1
+
+        for card in cards:
+            render_card(screen, card, card_focused)
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w]:
@@ -103,12 +104,12 @@ def main() -> None:
     pygame.quit()
 
 
-def find_clicked_card(rects):
+def find_clicked_card(cards: list[Card]):
     click_pos = pygame.mouse.get_pos()
     tmp = None
-    for rect in rects:
-        if rect[1].collidepoint(click_pos):
-            tmp = rect[0]
+    for card in cards:
+        if card.rect.collidepoint(click_pos):
+            tmp = card[0]
     return tmp
 
 

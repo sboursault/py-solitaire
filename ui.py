@@ -1,7 +1,15 @@
 import functools
+from typing import NamedTuple
 
 import pygame
 from pygame import Surface, Rect
+
+# TODO move to sol
+class Card(NamedTuple):
+    value: str
+    rect: Rect
+    is_face_up: bool
+
 
 pygame.init()
 
@@ -26,33 +34,32 @@ def draw_bg(screen: Surface):
     screen.blit(image, (left, top))
 
 
-def render_stack(screen: Surface, stack: dict, pos: tuple[int, int],
-                 card_clicked: str | None = None) -> list[tuple[str, Rect, bool]]:
+def render_stack(stack: dict, pos: tuple[int, int]) -> list[Card]:
     count = 0
-    rects = []
+    cards: list[Card] = []
     for card in stack['face_down']:
-        rects.append(render_card(screen, card, (pos[0], pos[1] + SPACE_WITHIN_COL * count), True, card_clicked))
+        cards.append(card_rect(card, (pos[0], pos[1] + SPACE_WITHIN_COL * count), True))
         count = count + 1
     for card in stack['face_up']:
-        rects.append(render_card(screen, card, (pos[0], pos[1] + SPACE_WITHIN_COL * count), False, card_clicked))
+        cards.append(card_rect(card, (pos[0], pos[1] + SPACE_WITHIN_COL * count), False))
         count = count + 1
-    return rects
+
+    return cards
 
 
-def card_rect(value: str, pos: tuple[int, int], face_down=False) -> tuple[str, Rect, bool]:
-    return value, pygame.Rect(pos[0], pos[1], 100, 200), not face_down
+def card_rect(value: str, pos: tuple[int, int], face_down=False) -> Card:
+    return Card(value, pygame.Rect(pos[0], pos[1], 100, 200), not face_down)
 
 
-def render_card(screen: Surface, value: str, pos: tuple[int, int], face_down=False,
-                card_clicked: str | None = None) -> tuple[str, Rect, bool]:
-    card = card_rect(value, pos, face_down)
-    border_color = 'red' if card_clicked == value else 'black'
-    if face_down:
-        rect = pygame.draw.rect(screen, "blue", card[1])
-        pygame.draw.rect(screen, border_color, card[1], 3)
+def render_card(screen: Surface, card: Card,
+                card_focused: str | None = None) -> Card:
+    border_color = 'red' if card_focused == card.value else 'black'
+    if card.is_face_up:
+        pygame.draw.rect(screen, "white", card.rect)
+        pygame.draw.rect(screen, border_color, card.rect, 3)
+        color = 'red' if card[0][0] in ['♦', '♥'] else 'black'
+        GAME_FONT.render_to(screen, (card.rect[0] + 5, card.rect[1] + 5), card.value, color)
     else:
-        rect = pygame.draw.rect(screen, "white", card[1])
-        pygame.draw.rect(screen, border_color, card[1], 3)
-        color = 'red' if value[0] in ['♦', '♥'] else 'black'
-        GAME_FONT.render_to(screen, (card[1][0] + 5, card[1][1] + 5), value, color)
-    return value, rect, not face_down
+        pygame.draw.rect(screen, "blue", card.rect)
+        pygame.draw.rect(screen, border_color, card.rect, 3)
+    return card
