@@ -18,7 +18,8 @@ def get_bg_img():
 
 
 def draw_bg(screen: Surface):
-    screen.fill("darkgreen")
+    screen.fill("cadetblue2")
+    # screen.fill("darkgreen")
     image = get_bg_img()
     left = (screen.get_width() - image.get_width()) / 2
     top = (screen.get_height() - image.get_height()) / 2
@@ -26,7 +27,7 @@ def draw_bg(screen: Surface):
 
 
 def render_stack(screen: Surface, stack: dict, pos: tuple[int, int],
-                 card_clicked: str | None = None) -> list[tuple[str, Rect]]:
+                 card_clicked: str | None = None) -> list[tuple[str, Rect, bool]]:
     count = 0
     rects = []
     for card in stack['face_down']:
@@ -38,15 +39,20 @@ def render_stack(screen: Surface, stack: dict, pos: tuple[int, int],
     return rects
 
 
+def card_rect(value: str, pos: tuple[int, int], face_down=False) -> tuple[str, Rect, bool]:
+    return value, pygame.Rect(pos[0], pos[1], 100, 200), not face_down
+
+
 def render_card(screen: Surface, value: str, pos: tuple[int, int], face_down=False,
-                card_clicked: str | None = None) -> tuple[str, Rect]:
+                card_clicked: str | None = None) -> tuple[str, Rect, bool]:
+    card = card_rect(value, pos, face_down)
     border_color = 'red' if card_clicked == value else 'black'
     if face_down:
-        rect = pygame.draw.rect(screen, "blue", (pos, (100, 200)))
-        pygame.draw.rect(screen, border_color, (pos, (100, 200)), 3)
+        rect = pygame.draw.rect(screen, "blue", card[1])
+        pygame.draw.rect(screen, border_color, card[1], 3)
     else:
-        rect = pygame.draw.rect(screen, "white", (pos, (100, 200)))
-        pygame.draw.rect(screen, border_color, (pos, (100, 200)), 3)
+        rect = pygame.draw.rect(screen, "white", card[1])
+        pygame.draw.rect(screen, border_color, card[1], 3)
         color = 'red' if value[0] in ['♦', '♥'] else 'black'
-        GAME_FONT.render_to(screen, (pos[0] + 5, pos[1] + 5), value, color)
-    return value, rect
+        GAME_FONT.render_to(screen, (card[1][0] + 5, card[1][1] + 5), value, color)
+    return value, rect, not face_down

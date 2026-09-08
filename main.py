@@ -36,20 +36,28 @@ def main() -> None:
     while running:
 
         card_clicked: str | None = None
+        card_dragged: str | None = None
+
 
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+            # https://stackoverflow.com/questions/44343626/how-to-draw-objects-that-can-be-dragged-and-droped-on-the-screen-using-pygame
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                click_pos = pygame.mouse.get_pos()
-                for rect in rects:
-                    if rect[1].collidepoint(click_pos):
-                        card_clicked = rect[0]
+                card_dragged = find_clicked_card(rects)
+            #if event.type == pygame.MOUSEMOTION:
+            #    if card_dragged:
+            #        card_dragged.topleft = event.pos + offset
+            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                card_dragged = None
+                card_clicked = find_clicked_card(rects)
 
         if is_face_down(stacks, card_clicked):
             return_card(stacks, card_clicked)
+
         elif is_face_up(stacks, card_clicked):
             if not card_focused:
                 card_focused = card_clicked
@@ -66,6 +74,8 @@ def main() -> None:
         # rects.append(render_card(screen, '♠25', (290 + COL_WIDTH, 5), face_down=True))
         # rects.append(render_card(screen, '♠25', (290 + COL_WIDTH * 2, 5), face_down=True))
         # rects.append(render_card(screen, '♠25', (290 + COL_WIDTH * 3, 5), face_down=True))
+
+        ## REDRAW EVERYTHING... COULD BE AVOIDED WHEN DRAGGING CARD
 
         count = 0
         for stack in stacks:
@@ -91,6 +101,15 @@ def main() -> None:
         dt = clock.tick(60) / 1000
 
     pygame.quit()
+
+
+def find_clicked_card(rects):
+    click_pos = pygame.mouse.get_pos()
+    tmp = None
+    for rect in rects:
+        if rect[1].collidepoint(click_pos):
+            tmp = rect[0]
+    return tmp
 
 
 if __name__ == '__main__':
