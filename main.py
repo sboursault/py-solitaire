@@ -32,12 +32,18 @@ def main() -> None:
     cards: list[Card] = []
 
     card_focused: str | None = None
+    card_dragged: str | None = None
+    drag_from: tuple[int, int] | None = None
 
     while running:
 
         card_clicked: str | None = None
-        card_dragged: str | None = None
 
+
+        count = 0
+        for stack in stacks:
+            cards = cards + render_stack(stack, (5 + COL_WIDTH * count, COL_TOP))
+            count = count + 1
 
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
@@ -46,11 +52,18 @@ def main() -> None:
                 running = False
 
             # https://stackoverflow.com/questions/44343626/how-to-draw-objects-that-can-be-dragged-and-droped-on-the-screen-using-pygame
-            #if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            #    card_dragged = find_clicked_card(cards)
-            #if event.type == pygame.MOUSEMOTION:
-            #    if card_dragged:
-            #        card_dragged.topleft = event.pos + offset
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                card_dragged = find_clicked_card(cards)
+                drag_from = pygame.mouse.get_pos()
+            if event.type == pygame.MOUSEMOTION:
+                mouse_pos = pygame.mouse.get_pos()
+                #print(card_dragged)
+                #print(mouse_pos)
+                if card_dragged and drag_from:
+                    offset = (mouse_pos[0] - drag_from[0], mouse_pos[1] - drag_from[1])
+                    print(offset)
+
+                    # card_dragged.topleft = event.pos + offset
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 card_dragged = None
                 card_clicked = find_clicked_card(cards)
@@ -75,10 +88,7 @@ def main() -> None:
         # rects.append(render_card(screen, '♠25', (290 + COL_WIDTH * 2, 5), face_down=True))
         # rects.append(render_card(screen, '♠25', (290 + COL_WIDTH * 3, 5), face_down=True))
 
-        count = 0
-        for stack in stacks:
-            cards = cards + render_stack(stack, (5 + COL_WIDTH * count, COL_TOP))
-            count = count + 1
+
 
         for card in cards:
             render_card(screen, card, card_focused)
