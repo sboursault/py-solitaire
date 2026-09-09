@@ -1,11 +1,12 @@
 import functools
-from typing import NamedTuple
+from dataclasses import dataclass
 
 import pygame
 from pygame import Surface, Rect
 
-# TODO move to sol
-class Card(NamedTuple):
+
+@dataclass
+class Card:
     value: str
     rect: Rect
     is_face_up: bool
@@ -52,12 +53,12 @@ def card_rect(value: str, pos: tuple[int, int], face_down=False) -> Card:
 
 
 def render_card(screen: Surface, card: Card,
-                card_focused: str | None = None) -> Card:
-    border_color = 'red' if card_focused == card.value else 'black'
+                card_focused: Card | None = None) -> Card:
+    border_color = 'red' if card_focused and card_focused.value == card.value else 'black'
     if card.is_face_up:
         pygame.draw.rect(screen, "white", card.rect)
         pygame.draw.rect(screen, border_color, card.rect, 3)
-        color = 'red' if card[0][0] in ['♦', '♥'] else 'black'
+        color = 'red' if card.value[0] in ['♦', '♥'] else 'black'
         GAME_FONT.render_to(screen, (card.rect[0] + 5, card.rect[1] + 5), card.value, color)
     else:
         pygame.draw.rect(screen, "blue", card.rect)

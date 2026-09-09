@@ -31,14 +31,15 @@ def main() -> None:
 
     cards: list[Card] = []
 
-    card_focused: str | None = None
-    card_dragged: str | None = None
-    drag_from: tuple[int, int] | None = None
+    card_focused: Card | None = None
+    card_dragged: Card | None = None
+    drag_cursor_start: tuple[int, int] | None = None
+    drag_origin_rect: tuple[int, int, int, int] | None = None
+
 
     while running:
 
-        card_clicked: str | None = None
-
+        card_clicked: Card | None = None
 
         count = 0
         for stack in stacks:
@@ -51,34 +52,42 @@ def main() -> None:
             if event.type == pygame.QUIT:
                 running = False
 
-            # https://stackoverflow.com/questions/44343626/how-to-draw-objects-that-can-be-dragged-and-droped-on-the-screen-using-pygame
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 card_dragged = find_clicked_card(cards)
-                drag_from = pygame.mouse.get_pos()
+                drag_cursor_start = pygame.mouse.get_pos()
+                drag_origin_rect = card_dragged.rect
             if event.type == pygame.MOUSEMOTION:
                 mouse_pos = pygame.mouse.get_pos()
-                #print(card_dragged)
-                #print(mouse_pos)
-                if card_dragged and drag_from:
-                    offset = (mouse_pos[0] - drag_from[0], mouse_pos[1] - drag_from[1])
-                    print(offset)
-
+                if card_dragged:
+                    offset = (mouse_pos[0] - drag_cursor_start[0], mouse_pos[1] - drag_cursor_start[1])
+                    card_dragged.rect = pygame.Rect(drag_origin_rect[0] + offset[0],
+                                                    drag_origin_rect[1] + offset[1],
+                                                    drag_origin_rect[2],
+                                                    drag_origin_rect[3])
                     # card_dragged.topleft = event.pos + offset
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                card_dragged = None
-                card_clicked = find_clicked_card(cards)
+                if card_dragged:
+                    print(pygame.mouse.get_pos())
+                    print(drag_cursor_start)
+                    if pygame.mouse.get_pos() == drag_cursor_start:
+                        print('hello')
+                        card_clicked = card_dragged
+                    else:
+                        print('zut')
+                        card_dragged.rect = drag_origin_rect
+                    card_dragged = None
 
-        if is_face_down(stacks, card_clicked):
-            return_card(stacks, card_clicked)
-
-        elif is_face_up(stacks, card_clicked):
-            if not card_focused:
-                card_focused = card_clicked
+        if card_clicked:
+            if not card_clicked.is_face_up:
+                return_card(stacks, card_clicked.value)
             else:
-                if card_focused == card_clicked:
-                    card_focused = None
-               # else:
-               # move cards
+                if not card_focused:
+                    card_focused = card_clicked
+                else:
+                    if card_focused == card_clicked:
+                        card_focused = None
+                # else:
+                # move cards
 
         # fill the screen with a color to wipe away anything from last frame
         ui.draw_bg(screen)
@@ -87,8 +96,6 @@ def main() -> None:
         # rects.append(render_card(screen, '♠25', (290 + COL_WIDTH, 5), face_down=True))
         # rects.append(render_card(screen, '♠25', (290 + COL_WIDTH * 2, 5), face_down=True))
         # rects.append(render_card(screen, '♠25', (290 + COL_WIDTH * 3, 5), face_down=True))
-
-
 
         for card in cards:
             render_card(screen, card, card_focused)
@@ -114,13 +121,13 @@ def main() -> None:
     pygame.quit()
 
 
-def find_clicked_card(cards: list[Card]):
+def find_clicked_card(cards: list[Card]) -> Card | None:
     click_pos = pygame.mouse.get_pos()
-    tmp = None
+    match = None
     for card in cards:
         if card.rect.collidepoint(click_pos):
-            tmp = card[0]
-    return tmp
+            match = card
+    return match
 
 
 if __name__ == '__main__':
