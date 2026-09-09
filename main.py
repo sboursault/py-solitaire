@@ -7,7 +7,6 @@
 
 import pygame
 import pygame.freetype  # Import the freetype module.
-from pygame import Rect
 
 from sol import *
 import ui
@@ -29,22 +28,16 @@ def main() -> None:
 
     player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 
-    cards: list[Card] = []
-
     card_focused: Card | None = None
     card_dragged: Card | None = None
     drag_cursor_start: tuple[int, int] | None = None
-    drag_origin_rect: tuple[int, int, int, int] | None = None
-
+    drag_offset: tuple[int, int] | None = None
+    drag_origin_rect: Card | None = None
+    cards: list[Card] = dispatch_cards()
 
     while running:
 
         card_clicked: Card | None = None
-
-        count = 0
-        for stack in stacks:
-            cards = cards + render_stack(stack, (5 + COL_WIDTH * count, COL_TOP))
-            count = count + 1
 
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
@@ -52,34 +45,36 @@ def main() -> None:
             if event.type == pygame.QUIT:
                 running = False
 
+            # IDEE : garder mouse_down_pos, drag_offset, mouse_up_pos
+            # et déduire les changements ensuite
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 card_dragged = find_clicked_card(cards)
-                drag_cursor_start = pygame.mouse.get_pos()
-                drag_origin_rect = card_dragged.rect
+                if card_dragged:
+                    drag_cursor_start = pygame.mouse.get_pos()
+                    drag_origin_rect = card_dragged.rect
+                drag_offset = None
             if event.type == pygame.MOUSEMOTION:
                 mouse_pos = pygame.mouse.get_pos()
                 if card_dragged:
-                    offset = (mouse_pos[0] - drag_cursor_start[0], mouse_pos[1] - drag_cursor_start[1])
-                    card_dragged.rect = pygame.Rect(drag_origin_rect[0] + offset[0],
-                                                    drag_origin_rect[1] + offset[1],
-                                                    drag_origin_rect[2],
-                                                    drag_origin_rect[3])
-                    # card_dragged.topleft = event.pos + offset
+                    drag_offset = (mouse_pos[0] - drag_cursor_start[0], mouse_pos[1] - drag_cursor_start[1])
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 if card_dragged:
-                    print(pygame.mouse.get_pos())
-                    print(drag_cursor_start)
                     if pygame.mouse.get_pos() == drag_cursor_start:
-                        print('hello')
                         card_clicked = card_dragged
                     else:
-                        print('zut')
                         card_dragged.rect = drag_origin_rect
                     card_dragged = None
+                drag_offset = None
 
+        if card_dragged and drag_offset:
+            card_dragged.rect = pygame.Rect(drag_origin_rect[0] + drag_offset[0],
+                                            drag_origin_rect[1] + drag_offset[1],
+                                            drag_origin_rect[2],
+                                            drag_origin_rect[3])
         if card_clicked:
             if not card_clicked.is_face_up:
                 return_card(stacks, card_clicked.value)
+                cards = dispatch_cards()
             else:
                 if not card_focused:
                     card_focused = card_clicked
@@ -119,6 +114,15 @@ def main() -> None:
         dt = clock.tick(60) / 1000
 
     pygame.quit()
+
+
+def dispatch_cards():
+    count = 0
+    cards: list[Card] = []
+    for stack in stacks:
+        cards = cards + render_stack(stack, (5 + COL_WIDTH * count, COL_TOP))
+        count = count + 1
+    return cards
 
 
 def find_clicked_card(cards: list[Card]) -> Card | None:
